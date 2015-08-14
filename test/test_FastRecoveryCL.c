@@ -372,3 +372,21 @@ void test_TxTCPSM_for_fast_recovery_start_from_begining_with_offset_0_and_conges
   TEST_ASSERT_EQUAL(150,session.cwnd->size);
   TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
 }
+
+// void test_FastRecovery_for_multiple_duplicate_case(void){
+  
+  // TCPSession session = {.offset = 2000};
+  // Cwnd Window = { .size = 400, .offset = 1000};
+  // TCP_state state = {.state = FastRecovery};
+  // session.cwnd = &Window;
+  // session.tcpState = &state;
+  
+  // cwndGetDataBlock_ExpectAndReturn(session.cwnd,2000,50,&state.ptrBlock,0);
+  // getDataPacket_ExpectAndReturn(&packet,&receiveData,1000);
+  // TxTCPSM(&session,&packet);
+  // TEST_ASSERT_EQUAL(1000,session.cwnd->offset);
+  // TEST_ASSERT_EQUAL(2000,session.cwnd->size);
+  // TEST_ASSERT_EQUAL(FastRecovery);
+  
+  
+// }

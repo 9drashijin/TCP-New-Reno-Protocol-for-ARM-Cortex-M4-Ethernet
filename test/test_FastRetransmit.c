@@ -26,13 +26,17 @@ void tearDown(void){}
 */
 void test_TxTCPSM_Fast_Retransmit_with_retransmit_sequnceNumber_100(){
   
-  TCPSession session = {.offset = 250, .dupAckCounter = 0};
-  Cwnd cwnd = {.size = 150, .offset = 100, .lostPacket = 100}; 
-  TCP_state state = {.state = FastRetransmit};
+  TCPSession session = {.offset = 250, .dupAckCounter = 2};
+  Cwnd cwnd = {.size = 150, .offset = 100, .lostPacket = 5}; 
+  TCP_state state = {.state = CongestionAvoidance};
   session.cwnd = &cwnd;
   session.tcpState = &state;
   uint32_t size;
   Packet packet = {.srcIpAddr = 1};
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,250,50,&state.ptrBlock,0);
+  getDataPacket_ExpectAndReturn(&packet,&receiveData,100);
+  TxTCPSM(&session,&packet);
   
   sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,150);
   TxTCPSM(&session,&packet);

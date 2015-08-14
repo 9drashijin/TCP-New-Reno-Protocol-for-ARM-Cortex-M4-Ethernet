@@ -65,7 +65,7 @@ uint32_t TxTCPSM(TCPSession *session, Packet *packet){
   static uint32_t counter = 0;
   static uint32_t tempCwndSize;
   static uint32_t recover;
-
+  
   switch(sessionState->state){
     case SlowStart:
       session->offset = cwndGetBeginningOffset(sessionCWND);

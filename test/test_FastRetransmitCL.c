@@ -76,7 +76,7 @@ void test_TxTCPSM_for_fast_retransmit_resend_the_lost_packet_after_3_ACK_from_co
   TEST_ASSERT_EQUAL(100,session.cwnd->offset);
   TEST_ASSERT_EQUAL(150,session.cwnd->size);
   TEST_ASSERT_EQUAL(SlowStartWaitACK,session.tcpState->state);
-  
+
   cwndGetDataBlock_ExpectAndReturn(session.cwnd,150,50,&state.ptrBlock, 0);
   getDataPacket_ExpectAndReturn(&packet,&receiveData,100);  // duplicate ACK 100 (first dupACK)
   TxTCPSM(&session,&packet);
@@ -97,7 +97,7 @@ void test_TxTCPSM_for_fast_retransmit_resend_the_lost_packet_after_3_ACK_from_co
   TEST_ASSERT_EQUAL(100,Window.offset);
   TEST_ASSERT_EQUAL(150,Window.size);
   TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
-  
+
   cwndGetDataBlock_ExpectAndReturn(session.cwnd,250,50,&state.ptrBlock,50);
   sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,300); //send 300
   TxTCPSM(&session,&packet);
@@ -111,7 +111,7 @@ void test_TxTCPSM_for_fast_retransmit_resend_the_lost_packet_after_3_ACK_from_co
   TEST_ASSERT_EQUAL(100,session.cwnd->offset);
   TEST_ASSERT_EQUAL(150,session.cwnd->size);
   TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
-  
+
   cwndGetDataBlock_ExpectAndReturn(session.cwnd,300,50,&state.ptrBlock, 0);
   getDataPacket_ExpectAndReturn(&packet,&receiveData,100);  // duplicate ACK 100 (third dupACK)
   TxTCPSM(&session,&packet);
@@ -192,7 +192,7 @@ void test_TxTCPSM_for_fast_retransmit_after_resend_the_lost_packet_and_should_mo
   TEST_ASSERT_EQUAL(100,session.cwnd->offset);
   TEST_ASSERT_EQUAL(150,session.cwnd->size);
   TEST_ASSERT_EQUAL(SlowStartWaitACK,session.tcpState->state);
-  
+
   cwndGetDataBlock_ExpectAndReturn(session.cwnd,150,50,&state.ptrBlock, 0);
   getDataPacket_ExpectAndReturn(&packet,&receiveData,100);  // duplicate ACK 100 (first dupACK)
   TxTCPSM(&session,&packet);
@@ -213,7 +213,7 @@ void test_TxTCPSM_for_fast_retransmit_after_resend_the_lost_packet_and_should_mo
   TEST_ASSERT_EQUAL(100,Window.offset);
   TEST_ASSERT_EQUAL(150,Window.size);
   TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
-  
+
   cwndGetDataBlock_ExpectAndReturn(session.cwnd,250,50,&state.ptrBlock,50);
   sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,300); //send 300
   TxTCPSM(&session,&packet);
@@ -227,7 +227,7 @@ void test_TxTCPSM_for_fast_retransmit_after_resend_the_lost_packet_and_should_mo
   TEST_ASSERT_EQUAL(100,session.cwnd->offset);
   TEST_ASSERT_EQUAL(150,session.cwnd->size);
   TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
-  
+
   cwndGetDataBlock_ExpectAndReturn(session.cwnd,300,50,&state.ptrBlock, 0);
   getDataPacket_ExpectAndReturn(&packet,&receiveData,100);  // duplicate ACK 100 (third dupACK)
   TxTCPSM(&session,&packet);
@@ -240,35 +240,35 @@ void test_TxTCPSM_for_fast_retransmit_after_resend_the_lost_packet_and_should_mo
   TEST_ASSERT_EQUAL(100,session.cwnd->offset);
   TEST_ASSERT_EQUAL(250,session.cwnd->size);
   TEST_ASSERT_EQUAL(FastRecovery,session.tcpState->state);
-  
+
   cwndGetDataBlock_ExpectAndReturn(session.cwnd,300,50,&state.ptrBlock,50);
   sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,350); //send 350
   TxTCPSM(&session,&packet);
   TEST_ASSERT_EQUAL(100,Window.offset);
   TEST_ASSERT_EQUAL(250,Window.size);
   TEST_ASSERT_EQUAL(FastRecovery,session.tcpState->state);
-  
+
   cwndGetDataBlock_ExpectAndReturn(session.cwnd,350,50,&state.ptrBlock,50);
   sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,400); //send 400
   TxTCPSM(&session,&packet);
   TEST_ASSERT_EQUAL(100,Window.offset);
   TEST_ASSERT_EQUAL(250,Window.size);
   TEST_ASSERT_EQUAL(FastRecovery,session.tcpState->state);
-  
+
   cwndGetDataBlock_ExpectAndReturn(session.cwnd,400,50,&state.ptrBlock,50);
   sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,450); //send 450
   TxTCPSM(&session,&packet);
   TEST_ASSERT_EQUAL(100,Window.offset);
   TEST_ASSERT_EQUAL(250,Window.size);
   TEST_ASSERT_EQUAL(FastRecovery,session.tcpState->state);
-  
+
   cwndGetDataBlock_ExpectAndReturn(session.cwnd,450,50,&state.ptrBlock,50);
   sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,500); //send 500
   TxTCPSM(&session,&packet);
   TEST_ASSERT_EQUAL(100,Window.offset);
   TEST_ASSERT_EQUAL(250,Window.size);
   TEST_ASSERT_EQUAL(FastRecovery,session.tcpState->state);
-  
+
   cwndGetDataBlock_ExpectAndReturn(session.cwnd,500,50,&state.ptrBlock,50);
   sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,550); //send 550
   TxTCPSM(&session,&packet);
@@ -276,10 +276,40 @@ void test_TxTCPSM_for_fast_retransmit_after_resend_the_lost_packet_and_should_mo
   TEST_ASSERT_EQUAL(250,Window.size);
   TEST_ASSERT_EQUAL(FastRecovery,session.tcpState->state);
 
-  cwndGetDataBlock_ExpectAndReturn(session.cwnd,550,50,&state.ptrBlock,0);
-  getDataPacket_ExpectAndReturn(&packet,&receiveData,350);
-  TxTCPSM(&session,&packet);
-  TEST_ASSERT_EQUAL(350,session.cwnd->offset);
-  TEST_ASSERT_EQUAL(100,session.cwnd->size);
-  TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
+  // cwndGetDataBlock_ExpectAndReturn(session.cwnd,550,50,&state.ptrBlock,0);
+  // getDataPacket_ExpectAndReturn(&packet,&receiveData,350);
+  // TxTCPSM(&session,&packet);
+  // TEST_ASSERT_EQUAL(350,session.cwnd->offset);
+  // TEST_ASSERT_EQUAL(100,session.cwnd->size);
+  // TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
 }
+/*
+*/
+void test_enter_fast_retransmit_after_duplicate_3_time_and_resend_lost_packet(void){
+
+  TCPSession session = {.offset = 5000, .dupAckCounter = 2};
+  Cwnd Window = { .size = 400, .offset = 2000, .lostPacket = 1000};
+  TCP_state state = {.state = CongestionAvoidance};
+  session.cwnd = &Window;
+  session.tcpState = &state;
+
+  TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
+
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,5000,50,&state.ptrBlock,0);
+  getDataPacket_ExpectAndReturn(&packet,&receiveData,2000);
+  TxTCPSM(&session,&packet);
+  TEST_ASSERT_EQUAL(2000,session.cwnd->offset);
+  TEST_ASSERT_EQUAL(400,session.cwnd->size);
+  TEST_ASSERT_EQUAL(0,session.dupAckCounter); // reset counter
+  TEST_ASSERT_EQUAL(FastRetransmit,session.tcpState->state); // JUMP to FastRetransmit State
+
+  sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,2050); //resend packet
+  TxTCPSM(&session,&packet);
+  TEST_ASSERT_EQUAL(FastRecovery,state.state);
+  TEST_ASSERT_EQUAL(1500,session.cwnd->ssthresh); // 5000 - 2000 / 2 =1500
+  TEST_ASSERT_EQUAL(3650,session.cwnd->recover);
+  TEST_ASSERT_EQUAL(1650,session.cwnd->size);     // 1500 + 3*SMSS = 1650
+}
+
+
+

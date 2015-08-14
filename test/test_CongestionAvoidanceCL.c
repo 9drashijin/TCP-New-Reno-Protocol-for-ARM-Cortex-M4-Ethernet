@@ -3,6 +3,7 @@
 #include "TCPhelper.h"
 #include "mock_congestionWindow.h"
 #include "mock_Packet.h"
+#include "linkedList.h"
 
 void setUp(void){}
 void tearDown(void){}
@@ -542,6 +543,96 @@ void test_TxTCPSM_Congestion_avoidance_should_increment_window_1by1_after_receiv
   TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
 
 }
+/*
+*   Receive ACK 1600 (Non-duplicate)
+*   Receive ACK 1600 (1st duplicate)
+*   Receive ACK 1600 (2nd duplicate)
+*   Receive ACK 1600 (3rd duplicate)
+*   Jump to FastRetransmit
+*/
+void test_TxTCPSM_Congestion_avoidance_to_jump_to_fast_retransmit_with_different_offset(void){
+  
+  TCPSession session = {.offset = 2000};
+  Cwnd Window = { .size = 800, .offset = 1600};
+  TCP_state state = {.state = SlowStartWaitACK};
+  session.cwnd = &Window;
+  session.tcpState = &state;
+  
+  TEST_ASSERT_EQUAL(SlowStartWaitACK,session.tcpState->state);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,2000,50,&state.ptrBlock,0);
+  getDataPacket_ExpectAndReturn(&packet,&receiveData,1600);  // ACK 1600
+  TxTCPSM(&session,&packet);
+  TEST_ASSERT_EQUAL(1600,session.cwnd->offset);
+  TEST_ASSERT_EQUAL(800,session.cwnd->size);
+  TEST_ASSERT_EQUAL(1,session.dupAckCounter); // check for duplicate (first Duplicate)
+  TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,2000,50,&state.ptrBlock,0);
+  getDataPacket_ExpectAndReturn(&packet,&receiveData,1600);  // ACK 1600
+  TxTCPSM(&session,&packet);
+  TEST_ASSERT_EQUAL(1600,session.cwnd->offset);
+  TEST_ASSERT_EQUAL(800,session.cwnd->size);
+  TEST_ASSERT_EQUAL(2,session.dupAckCounter); // check for duplicate (second Duplicate)
+  TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,2000,50,&state.ptrBlock,0);
+  getDataPacket_ExpectAndReturn(&packet,&receiveData,1600);  // ACK 1600
+  TxTCPSM(&session,&packet);
+  TEST_ASSERT_EQUAL(1600,session.cwnd->offset);
+  TEST_ASSERT_EQUAL(800,session.cwnd->size);
+  TEST_ASSERT_EQUAL(0,session.dupAckCounter); // check for duplicate (third Duplicate) reset counter
+  TEST_ASSERT_EQUAL(FastRetransmit,session.tcpState->state); // JUMP to FastRetransmit State
+}
+
+/*
+*   Receive ACK 1750 (Non-duplicate)
+*   Receive ACK 1750 (1st duplicate)
+*   Receive ACK 1750 (2nd duplicate)
+*   Receive ACK 1800 (3rd ACK success)
+*   remain in CongestionAvoidance
+*/
+void test_TxTCPSM_Congestion_avoidance_duplicate_2_time_and_with_different_offset(void){
+  
+  TCPSession session = {.offset = 2500};
+  Cwnd Window = { .size = 800, .offset = 1750};
+  TCP_state state = {.state = SlowStartWaitACK};
+  session.cwnd = &Window;
+  session.tcpState = &state;
+  
+  TEST_ASSERT_EQUAL(SlowStartWaitACK,session.tcpState->state);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,2500,50,&state.ptrBlock,0);
+  getDataPacket_ExpectAndReturn(&packet,&receiveData,1750);  // ACK 1750
+  TxTCPSM(&session,&packet);
+  TEST_ASSERT_EQUAL(1750,session.cwnd->offset);
+  TEST_ASSERT_EQUAL(800,session.cwnd->size);
+  TEST_ASSERT_EQUAL(1,session.dupAckCounter); // check for duplicate (first Duplicate)
+  TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,2500,50,&state.ptrBlock,0);
+  getDataPacket_ExpectAndReturn(&packet,&receiveData,1750);  // ACK 1750
+  TxTCPSM(&session,&packet);
+  TEST_ASSERT_EQUAL(1750,session.cwnd->offset);
+  TEST_ASSERT_EQUAL(800,session.cwnd->size);
+  TEST_ASSERT_EQUAL(2,session.dupAckCounter); // check for duplicate (second Duplicate)
+  TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,2500,50,&state.ptrBlock,0);
+  getDataPacket_ExpectAndReturn(&packet,&receiveData,1800);  // ACK 1800
+  TxTCPSM(&session,&packet);
+  TEST_ASSERT_EQUAL(1800,session.cwnd->offset);
+  TEST_ASSERT_EQUAL(800,session.cwnd->size);
+  TEST_ASSERT_EQUAL(0,session.dupAckCounter); 
+  TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state); // Still CongestionAvoidance State
+}
+
+
+
+
+
+
+
 
 
 

@@ -20,7 +20,8 @@ Packet packet;
  *    |    |      |    |          |    |              |    |                       |    |
  *    |____|      |____|          |____|              |____|                       |____|
  *
- *
+ *    For Partial ACK
+ *    
  */
 void test_TxTCPSM_for_fast_recovery_start_from_begining_with_offset_0_and_congestion_window_size_50_for_dupack_case_Partial_ACK(void){
   TCPSession session;
@@ -372,21 +373,73 @@ void test_TxTCPSM_for_fast_recovery_start_from_begining_with_offset_0_and_conges
   TEST_ASSERT_EQUAL(150,session.cwnd->size);
   TEST_ASSERT_EQUAL(CongestionAvoidance,session.tcpState->state);
 }
+/*
+*   offset set to 2000
+*   requestedSize still the same 50
+*   the window size 400 offset is 1000
+*   
+*   it ACK 3 time of duplicate packet 1000
+*   then fake the data to straight jump to fully acknowledgement after it reach the recover.
+*/
+void test_FastRecovery_for_multiple_duplicate_case_and_reach_the_recover_should_fully_ack(void){
+  
+  TCPSession session = {.offset = 2000, .requestedSize = 50};
+  Cwnd Window = { .size = 400, .offset = 1000};
+  TCP_state state = {.state = FastRecovery};
+  session.cwnd = &Window;
+  session.tcpState = &state;
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,2000,50,&state.ptrBlock,50);
+  sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,2050);
+  TxTCPSM(&session,&packet);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,2050,50,&state.ptrBlock,50);
+  sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,2100);
+  TxTCPSM(&session,&packet);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,2100,50,&state.ptrBlock,0);
+  getDataPacket_ExpectAndReturn(&packet,&receiveData,1000);
+  sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,1050);
+  cwndIncrementWindow_ExpectAndReturn(session.cwnd,400,450);
+  TxTCPSM(&session,&packet);
+  TEST_ASSERT_EQUAL(1000,session.cwnd->offset);
+  TEST_ASSERT_EQUAL(450,session.cwnd->size);
+  TEST_ASSERT_EQUAL(FastRecovery,session.tcpState->state);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd, 2100,50,&state.ptrBlock,50);
+  sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,2150);
+  TxTCPSM(&session,&packet);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,2150,50,&state.ptrBlock,0);
+  getDataPacket_ExpectAndReturn(&packet,&receiveData,1000);
+  sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,1050);
+  cwndIncrementWindow_ExpectAndReturn(session.cwnd,450,500);
+  TxTCPSM(&session,&packet);
+  TEST_ASSERT_EQUAL(1000,session.cwnd->offset);
+  TEST_ASSERT_EQUAL(500,session.cwnd->size);
+  TEST_ASSERT_EQUAL(FastRecovery,session.tcpState->state);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd, 2150,50,&state.ptrBlock,50);
+  sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,2200);
+  TxTCPSM(&session,&packet);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,2200,50,&state.ptrBlock,0);
+  getDataPacket_ExpectAndReturn(&packet,&receiveData,1000);
+  sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,1050);
+  cwndIncrementWindow_ExpectAndReturn(session.cwnd,500,550);
+  TxTCPSM(&session,&packet);
+  TEST_ASSERT_EQUAL(1000,session.cwnd->offset);
+  TEST_ASSERT_EQUAL(550,session.cwnd->size);
+  TEST_ASSERT_EQUAL(FastRecovery,session.tcpState->state);
+  
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd, 2200,50,&state.ptrBlock,50);
+  sendDataPacket_Expect(&packet,&session.tcpState->ptrBlock,2250);
+  TxTCPSM(&session,&packet);
 
-// void test_FastRecovery_for_multiple_duplicate_case(void){
-  
-  // TCPSession session = {.offset = 2000};
-  // Cwnd Window = { .size = 400, .offset = 1000};
-  // TCP_state state = {.state = FastRecovery};
-  // session.cwnd = &Window;
-  // session.tcpState = &state;
-  
-  // cwndGetDataBlock_ExpectAndReturn(session.cwnd,2000,50,&state.ptrBlock,0);
-  // getDataPacket_ExpectAndReturn(&packet,&receiveData,1000);
-  // TxTCPSM(&session,&packet);
-  // TEST_ASSERT_EQUAL(1000,session.cwnd->offset);
-  // TEST_ASSERT_EQUAL(2000,session.cwnd->size);
-  // TEST_ASSERT_EQUAL(FastRecovery);
+  cwndGetDataBlock_ExpectAndReturn(session.cwnd,2250,50,&state.ptrBlock,0); // fake the to straight jump to fully acknowledge
+  getDataPacket_ExpectAndReturn(&packet,&receiveData,1550); // acknowledgement > recover = offset + size
+  TxTCPSM(&session,&packet);                                // offset 1000 + 550 size = 1550
   
   
-// }
+  
+}
